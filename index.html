@@ -1,0 +1,361 @@
+import React, { useState, useEffect } from 'react';
+import { Moon, Sun, Menu, X, Mail, Phone, MapPin, Send, Check, AlertCircle } from 'lucide-react';
+
+const WebAgency = () => {
+  const [darkMode, setDarkMode] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
+  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [formStatus, setFormStatus] = useState({ type: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ['home', 'services', 'portfolio', 'about', 'contact'];
+      const current = sections.find(section => {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          return rect.top <= 100 && rect.bottom >= 100;
+        }
+        return false;
+      });
+      if (current) setActiveSection(current);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setFormStatus({ type: '', message: '' });
+
+    try {
+      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_id: 'YOUR_SERVICE_ID',
+          template_id: 'YOUR_TEMPLATE_ID',
+          user_id: 'YOUR_PUBLIC_KEY',
+          template_params: {
+            from_name: formData.name,
+            from_email: formData.email,
+            subject: formData.subject,
+            message: formData.message,
+          }
+        })
+      });
+
+      if (response.ok) {
+        setFormStatus({ type: 'success', message: 'Message sent successfully! We\'ll get back to you soon.' });
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      } else {
+        throw new Error('Failed to send');
+      }
+    } catch (error) {
+      setFormStatus({ type: 'error', message: 'Failed to send message. Please try again or email us directly.' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const scrollToSection = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    setMobileMenuOpen(false);
+  };
+
+  const services = [
+    { title: 'Web Design', desc: 'Stunning, responsive designs that captivate your audience', icon: '🎨' },
+    { title: 'Web Development', desc: 'Cutting-edge development with latest technologies', icon: '⚡' },
+    { title: 'E-Commerce', desc: 'Scalable online stores that drive conversions', icon: '🛒' },
+    { title: 'SEO Optimization', desc: 'Boost your visibility and organic traffic', icon: '📈' },
+    { title: 'Brand Identity', desc: 'Create memorable brand experiences', icon: '✨' },
+    { title: 'Maintenance', desc: '24/7 support and continuous optimization', icon: '🔧' }
+  ];
+
+  const portfolio = [
+    { name: 'TechFlow', category: 'SaaS Platform', color: 'from-purple-500 to-pink-500' },
+    { name: 'GreenLeaf', category: 'E-Commerce', color: 'from-green-500 to-teal-500' },
+    { name: 'FinanceHub', category: 'Fintech', color: 'from-blue-500 to-cyan-500' },
+    { name: 'FoodieDelight', category: 'Restaurant', color: 'from-orange-500 to-red-500' }
+  ];
+
+  return (
+    <div className={`min-h-screen transition-colors duration-500 ${darkMode ? 'bg-gray-950 text-white' : 'bg-gray-50 text-gray-900'}`}>
+      {/* Navigation */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${darkMode ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-xl border-b ${darkMode ? 'border-gray-800' : 'border-gray-200'} shadow-lg`}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            {/* Logo */}
+            <div className="flex items-center space-x-3 flex-shrink-0">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center font-bold text-white text-xl shadow-lg">
+                W
+              </div>
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent whitespace-nowrap">
+                WebCraft Pro
+              </span>
+            </div>
+
+            {/* Desktop Menu */}
+            <div className="hidden lg:flex items-center space-x-8 flex-shrink-0">
+              <button onClick={() => scrollToSection('home')} className={`capitalize font-medium text-base transition-all duration-200 ${activeSection === 'home' ? 'text-blue-500' : darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}>
+                Home
+              </button>
+              <button onClick={() => scrollToSection('services')} className={`capitalize font-medium text-base transition-all duration-200 ${activeSection === 'services' ? 'text-blue-500' : darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}>
+                Services
+              </button>
+              <button onClick={() => scrollToSection('portfolio')} className={`capitalize font-medium text-base transition-all duration-200 ${activeSection === 'portfolio' ? 'text-blue-500' : darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}>
+                Portfolio
+              </button>
+              <button onClick={() => scrollToSection('about')} className={`capitalize font-medium text-base transition-all duration-200 ${activeSection === 'about' ? 'text-blue-500' : darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}>
+                About
+              </button>
+              <button onClick={() => scrollToSection('contact')} className={`capitalize font-medium text-base transition-all duration-200 ${activeSection === 'contact' ? 'text-blue-500' : darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}>
+                Contact
+              </button>
+              
+              <div className={`w-px h-6 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+              
+              <button 
+                onClick={() => setDarkMode(!darkMode)} 
+                className={`p-3.5 rounded-xl transition-all duration-300 transform hover:scale-110 shadow-xl ${darkMode ? 'bg-gradient-to-r from-yellow-400 to-orange-500 hover:shadow-yellow-500/50' : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-purple-500/50'}`}
+                title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              >
+                {darkMode ? <Sun size={24} className="text-white" /> : <Moon size={24} className="text-white" />}
+              </button>
+            </div>
+
+            {/* Mobile Menu Buttons */}
+            <div className="flex lg:hidden items-center space-x-3">
+              <button 
+                onClick={() => setDarkMode(!darkMode)} 
+                className={`p-3 rounded-xl transition-all duration-300 shadow-lg ${darkMode ? 'bg-gradient-to-r from-yellow-400 to-orange-500' : 'bg-gradient-to-r from-indigo-600 to-purple-600'}`}
+              >
+                {darkMode ? <Sun size={24} className="text-white" /> : <Moon size={24} className="text-white" />}
+              </button>
+              <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+                className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+              >
+                {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className={`lg:hidden ${darkMode ? 'bg-gray-900' : 'bg-white'} border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
+            <button onClick={() => scrollToSection('home')} className={`block w-full text-left px-6 py-4 capitalize font-medium ${darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
+              Home
+            </button>
+            <button onClick={() => scrollToSection('services')} className={`block w-full text-left px-6 py-4 capitalize font-medium ${darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
+              Services
+            </button>
+            <button onClick={() => scrollToSection('portfolio')} className={`block w-full text-left px-6 py-4 capitalize font-medium ${darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
+              Portfolio
+            </button>
+            <button onClick={() => scrollToSection('about')} className={`block w-full text-left px-6 py-4 capitalize font-medium ${darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
+              About
+            </button>
+            <button onClick={() => scrollToSection('contact')} className={`block w-full text-left px-6 py-4 capitalize font-medium ${darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
+              Contact
+            </button>
+          </div>
+        )}
+      </nav>
+
+      {/* Hero Section */}
+      <section id="home" className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 animate-gradient"></div>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center space-y-8 animate-fade-in">
+            <div className="inline-block">
+              <span className={`px-4 py-2 rounded-full text-sm font-medium ${darkMode ? 'bg-blue-500/20 text-blue-300' : 'bg-blue-100 text-blue-700'}`}>
+                🚀 Crafting Digital Excellence Since 2020
+              </span>
+            </div>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight">
+              Build Your Dream
+              <span className="block bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Website Today</span>
+            </h1>
+            <p className={`text-xl max-w-3xl mx-auto ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              We create stunning, high-performance websites that drive results. From design to deployment, we handle everything.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <button onClick={() => scrollToSection('contact')} className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl font-semibold hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105">
+                Get Started
+              </button>
+              <button onClick={() => scrollToSection('portfolio')} className={`px-8 py-4 rounded-xl font-semibold border-2 ${darkMode ? 'border-gray-700 hover:border-gray-600' : 'border-gray-300 hover:border-gray-400'} transition-all duration-300`}>
+                View Portfolio
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section id="services" className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold mb-4">Our Services</h2>
+            <p className={`text-xl ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Comprehensive solutions for your digital needs</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {services.map((service, idx) => (
+              <div key={idx} className={`group p-8 rounded-2xl transition-all duration-300 cursor-pointer ${darkMode ? 'bg-gray-900 hover:bg-gray-800' : 'bg-white hover:bg-gray-50'} border ${darkMode ? 'border-gray-800 hover:border-gray-700' : 'border-gray-200 hover:border-gray-300'} hover:shadow-2xl hover:-translate-y-2`}>
+                <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">{service.icon}</div>
+                <h3 className="text-2xl font-bold mb-3">{service.title}</h3>
+                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>{service.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Portfolio Section */}
+      <section id="portfolio" className={`py-20 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900/50' : 'bg-gray-100/50'}`}>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold mb-4">Featured Work</h2>
+            <p className={`text-xl ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Projects that speak for themselves</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-8">
+            {portfolio.map((project, idx) => (
+              <div key={idx} className={`group relative h-80 rounded-2xl overflow-hidden cursor-pointer ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-xl hover:shadow-2xl transition-all duration-300`}>
+                <div className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-80 group-hover:opacity-90 transition-opacity`}></div>
+                <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">
+                  <span className="text-sm font-medium mb-2 opacity-90">{project.category}</span>
+                  <h3 className="text-3xl font-bold">{project.name}</h3>
+                </div>
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section id="about" className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="text-4xl sm:text-5xl font-bold mb-6">Why Choose Us?</h2>
+              <p className={`text-lg mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                We're not just developers—we're digital strategists committed to your success. With over 200+ successful projects delivered, we combine creativity, technology, and business insight to create websites that don't just look good, but perform exceptionally.
+              </p>
+              <div className="space-y-4">
+                {['5+ Years Experience', '200+ Projects Delivered', '98% Client Satisfaction', '24/7 Support'].map((stat, idx) => (
+                  <div key={idx} className="flex items-center space-x-3">
+                    <Check className="text-green-500" />
+                    <span className="text-lg">{stat}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className={`p-8 rounded-2xl ${darkMode ? 'bg-gradient-to-br from-gray-900 to-gray-800' : 'bg-gradient-to-br from-gray-100 to-white'} border ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
+              <div className="space-y-6">
+                <div className={`p-6 rounded-xl ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                  <h4 className="text-xl font-bold mb-2">Our Mission</h4>
+                  <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>To empower businesses with cutting-edge web solutions that drive growth and success in the digital age.</p>
+                </div>
+                <div className={`p-6 rounded-xl ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                  <h4 className="text-xl font-bold mb-2">Our Vision</h4>
+                  <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>To be the most trusted web agency, known for innovation, quality, and exceptional client relationships.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" className={`py-20 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-900/50' : 'bg-gray-100/50'}`}>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold mb-4">Let's Work Together</h2>
+            <p className={`text-xl ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Ready to start your project? Get in touch today!</p>
+          </div>
+          <div className="grid lg:grid-cols-2 gap-12">
+            <div className="space-y-8">
+              <div className={`p-6 rounded-xl ${darkMode ? 'bg-gray-900' : 'bg-white'} border ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
+                <Mail className="text-blue-500 mb-4" size={32} />
+                <h4 className="text-xl font-bold mb-2">Email Us</h4>
+                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>hello@webcraft.pro</p>
+              </div>
+              <div className={`p-6 rounded-xl ${darkMode ? 'bg-gray-900' : 'bg-white'} border ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
+                <Phone className="text-green-500 mb-4" size={32} />
+                <h4 className="text-xl font-bold mb-2">Call Us</h4>
+                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>+1 (555) 123-4567</p>
+              </div>
+              <div className={`p-6 rounded-xl ${darkMode ? 'bg-gray-900' : 'bg-white'} border ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
+                <MapPin className="text-purple-500 mb-4" size={32} />
+                <h4 className="text-xl font-bold mb-2">Visit Us</h4>
+                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>123 Digital Ave, Tech City, TC 12345</p>
+              </div>
+            </div>
+            <div className={`p-8 rounded-2xl ${darkMode ? 'bg-gray-900' : 'bg-white'} border ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
+              <div className="space-y-6">
+                <div>
+                  <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="Your Name" className={`w-full px-4 py-3 rounded-xl ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-300'} border focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all`} />
+                </div>
+                <div>
+                  <input type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="Your Email" className={`w-full px-4 py-3 rounded-xl ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-300'} border focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all`} />
+                </div>
+                <div>
+                  <input type="text" required value={formData.subject} onChange={(e) => setFormData({...formData, subject: e.target.value})} placeholder="Subject" className={`w-full px-4 py-3 rounded-xl ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-300'} border focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all`} />
+                </div>
+                <div>
+                  <textarea required value={formData.message} onChange={(e) => setFormData({...formData, message: e.target.value})} placeholder="Your Message" rows="5" className={`w-full px-4 py-3 rounded-xl ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-300'} border focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none`}></textarea>
+                </div>
+                {formStatus.message && (
+                  <div className={`p-4 rounded-xl flex items-start space-x-3 ${formStatus.type === 'success' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                    {formStatus.type === 'success' ? <Check size={20} className="mt-0.5" /> : <AlertCircle size={20} className="mt-0.5" />}
+                    <span>{formStatus.message}</span>
+                  </div>
+                )}
+                <button onClick={handleSubmit} disabled={isSubmitting} className="w-full px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl font-semibold hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                  {isSubmitting ? <span>Sending...</span> : <><Send size={20} /><span>Send Message</span></>}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className={`py-12 px-4 sm:px-6 lg:px-8 border-t ${darkMode ? 'border-gray-800 bg-gray-900' : 'border-gray-200 bg-white'}`}>
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center font-bold text-white">W</div>
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">WebCraft Pro</span>
+          </div>
+          <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>© 2026 WebCraft Pro. All rights reserved.</p>
+          <p className={`mt-2 text-sm ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Crafting digital excellence, one website at a time.</p>
+        </div>
+      </footer>
+
+      <style jsx>{`
+        @keyframes gradient {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.8; }
+        }
+        .animate-gradient {
+          animation: gradient 8s ease infinite;
+        }
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fade-in 1s ease-out;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default WebAgency;
